@@ -1,6 +1,7 @@
 use rand::Rng;
+use regex::Regex;
 use std::{
-    io::{Write, stdin, stdout},
+    io::{Result, Write, stdin, stdout},
     thread,
     time::{Duration, Instant},
 };
@@ -17,9 +18,25 @@ fn generate_word() -> String {
         .collect()
 }
 
+// 用户输入流处理
+fn input_code() -> Result<String> {
+    let mut res = String::new();
+    let re = Regex::new(r"\s+").unwrap();
+    loop {
+        res.clear();
+        print!("> ");
+        let _ = stdout().flush();
+
+        stdin().read_line(&mut res)?;
+        let formatted = re.replace_all(&res, "").into_owned();
+        if formatted.len() == 6 {
+            return Ok(formatted);
+        }
+    }
+}
+
 fn main() {
     println!("=== Florr Code Practice ===");
-    let mut buf = String::new();
 
     loop {
         // 1) 随机 2–10 秒
@@ -35,19 +52,14 @@ fn main() {
         // 4) 产生并显示单词
         let word = generate_word();
         println!("\nCode: {}", word);
-        print!("> ");
         let _ = stdout().flush();
 
         // 5) 计时并读取用户输入
-        buf.clear();
         let start = Instant::now();
-        if stdin().read_line(&mut buf).is_err() {
-            break;
-        }
+        let input = input_code().unwrap();
         let elapsed = Instant::now().duration_since(start).as_secs_f64();
 
         // 6) 判断并反馈
-        let input = buf.trim_end();
         if input == word {
             println!("Success: {:.3} s", elapsed);
         } else {
