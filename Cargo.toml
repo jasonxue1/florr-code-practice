@@ -1,8 +1,9 @@
 [package]
 name = "florr-code-practice"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 
 [dependencies]
 rand = "0.8"
+regex = "1.11.1"
