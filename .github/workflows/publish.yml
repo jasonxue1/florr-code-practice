@@ -1,0 +1,61 @@
+name: Publish to crates.io
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Show cargo and rustc versions
+        run: |
+          rustc -Vv
+          cargo -Vv
+
+      - name: Verify tag matches Cargo.toml version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION_FROM_TAG="${TAG#v}"
+          PKG_VERSION=$(sed -n 's/^version\s*=\s*"\([^"]*\)"/\1/p' Cargo.toml | head -n1)
+          echo "Tag version:      $VERSION_FROM_TAG"
+          echo "Cargo.toml version: $PKG_VERSION"
+          if [ "$VERSION_FROM_TAG" != "$PKG_VERSION" ]; then
+            echo "Error: tag version ($VERSION_FROM_TAG) does not match Cargo.toml version ($PKG_VERSION)." >&2
+            exit 1
+          fi
+
+      - name: Check package (dry run)
+        run: cargo publish --dry-run --locked
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          # Actual publish only on tag pushes; manual runs only dry-run above
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            cargo publish --locked
+          else
+            echo "Not a tag push; skipping publish (dry run already executed)."
+          fi
+

@@ -1,5 +1,4 @@
 use rand::Rng;
-use regex::Regex;
 use std::{
     io::{Result, Write, stdin, stdout},
     thread,
@@ -9,10 +8,10 @@ use std::{
 /// 从 [a–z0–9] 中随机选 6 个字符
 fn generate_word() -> String {
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz0123456789";
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     (0..6)
         .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
+            let idx = rng.random_range(0..CHARSET.len());
             CHARSET[idx] as char
         })
         .collect()
@@ -21,16 +20,16 @@ fn generate_word() -> String {
 // 用户输入流处理
 fn input_code() -> Result<String> {
     let mut res = String::new();
-    let re = Regex::new(r"\s+").unwrap();
     loop {
         res.clear();
         print!("> ");
-        let _ = stdout().flush();
+        stdout().flush().ok();
 
         stdin().read_line(&mut res)?;
-        let formatted = re.replace_all(&res, "").into_owned();
-        if formatted.len() == 6 {
-            return Ok(formatted);
+        // 去除所有空白字符
+        res.retain(|c| !c.is_whitespace());
+        if res.len() == 6 {
+            return Ok(res);
         }
     }
 }
@@ -40,7 +39,7 @@ fn main() {
 
     loop {
         // 1) 随机 2–10 秒
-        let delay_ms = rand::thread_rng().gen_range(2_000..=10_000);
+        let delay_ms: u64 = rand::rng().random_range(2_000..=10_000);
 
         // 2) 提示用户“即将出现code”
         print!("\nNext code will appear soon… ");
@@ -51,19 +50,19 @@ fn main() {
 
         // 4) 产生并显示单词
         let word = generate_word();
-        println!("\nCode: {}", word);
-        let _ = stdout().flush();
+        println!("\nCode: {word}");
+        stdout().flush().ok();
 
         // 5) 计时并读取用户输入
         let start = Instant::now();
         let input = input_code().unwrap();
-        let elapsed = Instant::now().duration_since(start).as_secs_f64();
+        let elapsed = start.elapsed().as_secs_f64();
 
         // 6) 判断并反馈
         if input == word {
-            println!("Success: {:.3} s", elapsed);
+            println!("Success: {elapsed:.3} s");
         } else {
-            println!("Failure: {:.3} s (you typed `{}`)", elapsed, input);
+            println!("Failure: {elapsed:.3} s (you typed `{input}`)");
         }
     }
 }
