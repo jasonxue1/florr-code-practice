@@ -1,9 +1,13 @@
 [package]
 name = "florr-code-practice"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2024"
+license = "MIT"
+description = "A Rust project for practicing inputting squad codes in florr.io."
+authors = ["jasonxue <jason@xuechunxi.com>"]
+homepage = "https://github.com/jasonxue1/florr-code-practice"
+documentation = "https://docs.rs/florr-code-practice"
 
 
 [dependencies]
 rand = "0.9.2"
-regex = "1.11.1"
