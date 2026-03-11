@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -43,6 +43,12 @@ jobs:
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
           # Note that glob pattern is not supported yet.
           bin: florr-code-practice
+          # Use a cargo-binstall-friendly archive naming convention:
+          # {name}-{target}-v{version}, e.g. ripgrep-aarch64-apple-darwin-v15.1.0.tar.gz
+          archive: $bin-$target-$tag
+          # Create a leading directory in the archive matching the archive base name.
+          # This aligns with cargo-binstall's default bin-dir probing.
+          leading-dir: true
           # (optional) Target triple, default is host triple.
           target: ${{ matrix.target }}
           # (required) GitHub token for uploading assets to GitHub Releases.
