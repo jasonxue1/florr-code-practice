@@ -1,10 +1,11 @@
 [package]
 name = "florr-code-practice"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 description = "A Rust project for practicing inputting squad codes in florr.io."
 documentation = "https://docs.rs/florr-code-practice"
 homepage = "https://github.com/jasonxue1/florr-code-practice"
+repository = "https://github.com/jasonxue1/florr-code-practice"
 license = "MIT"
 
 [dependencies]
